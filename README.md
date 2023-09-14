@@ -1,8 +1,8 @@
 # OC-Python-Project
 Python developer training projects by Openclassrooms
-
-
-""" Code to extract single product details:
+# Phase 1 #
+Function get_prduct_details() --> "for single product"
+ Code to extract single product details:
     ● product_page_url 
     ● book_title 
     ● universal_ product_code (upc) 
@@ -13,6 +13,9 @@ Python developer training projects by Openclassrooms
     ● category 
     ● review_rating 
     ● image_url 
-    
-    Write the data to a CSV file using the above fields as column headings.
-"""
+ Write the data to a CSV file using the above fields as column headings.
+
+# Phase 2 #
+Function get_category_books_url() --> "for single category"
+    Code visits this category page and extracts the product page URL for each book in the category.
+    Stores in a list and displays the list
