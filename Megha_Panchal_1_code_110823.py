@@ -5,8 +5,9 @@ import csv
 
 #Column --> product_page_url
 URL = "http://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
+Category_URL = "http://books.toscrape.com/catalogue/category/books/travel_2/index.html"
 
-def get_product_details(product_url,category=""):
+def get_product_details(product_url):
 
     web_page = requests.get(product_url)
 
@@ -34,15 +35,15 @@ def get_product_details(product_url,category=""):
 
     #Column --> description ## PENDING
     description =soup.find("article",class_="product_page").select("p")[3].get_text(strip=True)
-    print(description)
+    #print(description)
 
     #Column --> category ## PENDING
     category = soup.find("ul",class_="breadcrumb").select("li")[1].find("a").get_text(strip=True)
     print(category)
 
     #Column --> review_rating
-    rating = soup.find("p",class_="star-rating Five").select("i")
-    review_rating = len(rating)
+    rating = soup.find("article",class_="product_page").select("p")[2]
+    review_rating = rating['class'][1]
     print(review_rating)
 
     #Column --> image_url
@@ -62,5 +63,6 @@ def get_product_details(product_url,category=""):
         data_row = [product_url,book_title,dict['UPC'],dict['Price (incl. tax)'],dict['Price (excl. tax)'],dict['Availability'],description,category,review_rating,image_url]
         writer.writerow(data_row)
     
+
 
 get_product_details(URL)
