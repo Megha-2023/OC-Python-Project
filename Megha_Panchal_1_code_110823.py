@@ -1,15 +1,18 @@
 """Code to extract book details from Books to Scrape website """
+import os
 import requests
 from bs4 import BeautifulSoup
+import shutil
 from urllib.parse import urljoin
 import csv
 
+MAIN_URL = "http://books.toscrape.com/catalogue/category/books_1/index.html"
 #Column --> product_page_url
-URL = "http://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
+BOOK_URL = "http://books.toscrape.com/catalogue/unbound-how-eight-technologies-made-us-human-transformed-society-and-brought-our-world-to-the-brink_950/index.html"
 Category_URL = "http://books.toscrape.com/catalogue/category/books/classics_6/index.html"           # url for category whose books are on single page
 Multipage_Category_URL = "http://books.toscrape.com/catalogue/category/books/mystery_3/index.html"  # url for category whose books are on multiple pages
 
-def get_product_details(product_url):
+def get_single_book_details(product_url):
     """Function to get all detailsl of speicified product url"""
 
     web_page = requests.get(product_url)
@@ -55,10 +58,21 @@ def get_product_details(product_url):
             image_url = im['src']
     image_url = image_url.replace("../..","http://books.toscrape.com/")
     dictofdetails["image_url"] = image_url
+
+    image_folder = os.getcwd()+"/images"
+    if not os.path.isdir(image_folder):
+        os.mkdir("images")
     
+    image_filename = os.getcwd() + "/images/" + image_url.split("/")[-3] + image_url.split("/")[-2] + ".jpg"
+    r = requests.get(image_url,stream=True)
+    if r.status_code == 200:
+        with open(image_filename,"wb") as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw,f)
+
     return dictofdetails
     
-def get_category_books_url(category_url):
+def get_single_category_books_url(category_url):
     """Function to get urls of all books from speicified category"""
     list_of_book_urls = []
     
@@ -103,50 +117,60 @@ def get_category_books_url(category_url):
             print(category_url)
         else:
             break
-    print(list_of_book_urls,len(list_of_book_urls))
+    return list_of_book_urls
         
-def write_details_csv():
-    """ function to write book data to the csv file """
-    header = []
-    data_row =[]
-    # retrive all books urls for specific category
-    book_urls = get_category_books_url(Category_URL)
+def get_all_categories(main_pageurl):
+    """Function to retrieve all categories URLs"""
 
-
-
+    web_page = requests.get(main_pageurl)
+    soup = BeautifulSoup(web_page.content,'html.parser')
+    all_cat_dict = {}
+    side_categories = soup.find("ul",class_="nav nav-list").find("li").select("a")
     
-    dict_product = get_product_details(book_urls[0])
-    with open('new_file.csv','w',newline='') as file:
-        writer = csv.writer(file,delimiter=';')
-        for key,value in dict_product.items():
-            header.append(key)
-            data_row.append(value)
-        writer.writerow(header)  
-        writer.writerow(data_row)  
-                
-        i = 1
-        while i < len(book_urls):
-            data_row = []   
-            dict_product = get_product_details(book_urls[i])
-            for key in dict_product:
-                data_row.append(dict_product[key])
+    for i in range(1,len(side_categories)):
+        cat_url = side_categories[i]["href"]
+        cat_url = cat_url.replace("..","http://books.toscrape.com/catalogue/category")
+        cat_name = side_categories[i].get_text(strip=True)
+        i += 1
+        all_cat_dict[cat_name] = cat_url
+    return all_cat_dict   
+
+
+def write_data_to_csv():
+    """Function to write details of each books of each categories to Separate csv file"""
+
+    header_row = ["product_page_url","book_title","upc","price_including_tax","price_excluding_tax","quantity_available","description","category","review_rating","image_url"]
+   
+    # retrieve all categories
+    all_categories = get_all_categories(MAIN_URL)
+    cat_names_list = list(all_categories.keys())
+    
+    for category in range(4,5):
+        cat_name = cat_names_list[category]
+        list_books_url = get_single_category_books_url(all_categories[cat_name])
+        
+        #make csv file as per category name
+        filename = open(cat_name+".csv","w",newline="")
+        writer = csv.writer(filename,delimiter=";")
+        writer.writerow(header_row)
+        i = 0
+
+        #write each book details to corresponding csv file
+        while i < len(list_books_url):
+            single_book_dict = get_single_book_details(list_books_url[i])
+            data_row = []
+            for j in range(len(header_row)):
+                data_row.append(single_book_dict[header_row[j]])
             writer.writerow(data_row)
-            i += 1  
-           
+            i += 1
+    
 
 def menu():
     print("Phase 1: Press 1")
     print("Phase 2 (Sinle page category): Press 2")
     print("Phase 2 (Multipage Category): Press 3")
     opt = int(input("Select option to execute phases:"))
-    if opt == 1:
-        get_product_details(URL)
-    elif opt == 2:
-        get_category_books_url(Category_URL)
-    elif opt == 3:
-        get_category_books_url(Multipage_Category_URL)
-    else:
-        return 
-    
-menu()
 
+
+#menu()
+write_data_to_csv()
