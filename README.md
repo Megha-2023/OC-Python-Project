@@ -1,27 +1,46 @@
-# OC-Python-Project
-Python developer training projects by Openclassrooms
-# Phase 1 #
-Function get_prduct_details() --> "for single product"
- Code to extract single product details:
-    ● product_page_url 
-    ● book_title 
-    ● universal_ product_code (upc) 
-    ● price_including_tax 
-    ● price_excluding_tax 
-    ● quantity_available 
-    ● product_description 
-    ● category 
-    ● review_rating 
-    ● image_url 
- Write the data to a CSV file using the above fields as column headings.
 
-# Phase 2 #
-Function get_category_books_url() --> "for single category" --> with pagination
-    Code visits this category page and extracts the product page URL for each book in the category.
-    Stores in a list and displays the list
+# Project - 2 Price Monitoring System
 
-Combine this script with the work you have completed in Phase 1 to extract the product data for each book in your category
+This code reflects the monitoring system to track book prices at [Books to Scrape](http://books.toscrape.com/), an online book retailer and establishes ETL pipeline.
 
-Function write_details_csv() --> writes the data to a single CSV file.
+The will read all the details of each book from each category and load it into the csv file named as per the category name and all book images will be downloaded in the images folder.
 
-# Phase 3 #
+## Libraries
+
+- request
+- BeautifulSoup
+- csv
+- urljoin
+
+To install libraries use the following command:
+
+```text
+pip install 
+```
+
+## Defined Functions
+
+- **get_all_categories(main_pageurl)**:
+
+    This function takes main page URL as an input and returns dictionary containing all categories of book.
+
+- **get_single_category_books_url(category_url)**:
+
+    This function takes category URL as input and returns list of all book-urls of the given category.
+
+- **get_single_book_details(product_url)**:
+
+    This function takes single book-url as an input and returns dictionary containing all the details for the given book.
+    It also downloads image of the book in the images folder.
+
+- **write_data_to_csv()**:
+
+    This function writes the details of each book into the separate csv file named as per the category name.
+
+## Execution
+
+To execute the code write following command on the command prompt from the current working directory:
+
+```text
+python Megha_Panchal_1_code_110223.py
+```
