@@ -15,7 +15,7 @@ The will read all the details of each book from each category and load it into t
 To install libraries use the following command:
 
 ```text
-pip install 
+pip install requirements.txt
 ```
 
 ## Defined Functions
